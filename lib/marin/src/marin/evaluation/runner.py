@@ -26,6 +26,7 @@ from marin.evaluation.records import (
     ModelRef,
     Provenance,
     RunStatus,
+    ServingParams,
     TaskCoverage,
     read_record,
     record_path,
@@ -146,7 +147,24 @@ def _record(
     jobs: dict[str, str],
     log_tails: dict[str, tuple[str, ...]],
     coverage: dict[str, TaskCoverage] | None = None,
+    serving: ServingParams | None = None,
 ) -> str:
+    if serving is None:
+        serve = batch.model.serve
+        serving = ServingParams(
+            tensor_parallel_size=serve.tensor_parallel_size,
+            data_parallel_size=serve.data_parallel_size,
+            pipeline_parallel_size=serve.pipeline_parallel_size,
+            task_count=serve.pipeline_parallel_size,
+            max_model_len=serve.max_model_len,
+        )
+    evalchemy = identity.eval_ref.evalchemy
+    serving = serving.model_copy(
+        update={
+            "max_gen_tokens": evalchemy.max_gen_toks if evalchemy is not None else None,
+            "extra": dict(evalchemy.extra_gen_kwargs) if evalchemy is not None else {},
+        }
+    )
     record = EvalRunRecord(
         run_id=identity.run_id,
         group_id=batch.group_id,
@@ -162,11 +180,13 @@ def _record(
         ),
         eval=identity.eval_ref,
         hardware=HardwareRef(
+            task_count=serving.task_count,
             platform=batch.accelerator.platform.value,
             accelerator=batch.accelerator.label,
             region_or_cluster=(batch.accelerator.target_cluster or batch.accelerator.region or "unconstrained"),
         ),
         status=status,
+        serving=serving,
         error=error,
         results_path=identity.output_dir,
         metrics=metrics,
@@ -287,7 +307,9 @@ def _run_one_evaluation(
             tails |= _session_tail(session)
             inference_failure = serve_exc
 
-    path = _record(batch, evaluation.identity, status, error, metrics, jobs, tails, coverage)
+    effective = session.effective_serving
+    serving = ServingParams(**asdict(effective), effective=True) if effective is not None else None
+    path = _record(batch, evaluation.identity, status, error, metrics, jobs, tails, coverage, serving)
     failure = f"{evaluation.identity.eval_ref.name} ({status.value})" if error is not None else None
     return _EvaluationExecution(
         record_path=path,
