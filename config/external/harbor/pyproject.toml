@@ -17,4 +17,4 @@ prerelease = "allow"
 
 [tool.uv.sources]
 # Keep this branch-based: uv.lock pins the runtime commit, and the external dependency updater advances it.
-harbor = { git = "https://github.com/marin-community/harbor.git", branch = "main" }
+harbor = { git = "https://github.com/marin-community/harbor.git", branch = "agent/20260916-strict-simpleqa-grading" }

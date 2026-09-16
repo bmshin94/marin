@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 2
 requires-python = "==3.12.*"
 resolution-markers = [
     "sys_platform == 'win32'",
@@ -781,7 +781,7 @@ wheels = [
 [[package]]
 name = "harbor"
 version = "0.8.1"
-source = { git = "https://github.com/marin-community/harbor.git?branch=main#9551f376157d90104011107dcbf9ca3621228126" }
+source = { git = "https://github.com/marin-community/harbor.git?branch=agent%2F20260916-strict-simpleqa-grading#f6694466514acffe42b969977ec7920242997bd1" }
 dependencies = [
     { name = "dirhash" },
     { name = "fastapi" },
@@ -1042,7 +1042,7 @@ dependencies = [
 requires-dist = [
     { name = "daytona", specifier = "==0.200.2" },
     { name = "gcsfs" },
-    { name = "harbor", git = "https://github.com/marin-community/harbor.git?branch=main" },
+    { name = "harbor", git = "https://github.com/marin-community/harbor.git?branch=agent%2F20260916-strict-simpleqa-grading" },
     { name = "pydantic-settings" },
     { name = "s3fs" },
 ]

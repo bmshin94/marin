@@ -161,6 +161,7 @@ def _resolve_definitions(
         if isinstance(definition, EvalchemyDefinition):
             source = next(evalchemy_sources)
             config = definition.config_for(source, model, limit)
+            secret_env = definition.secret_env_for(config)
             resolved.append(
                 (
                     name,
@@ -168,7 +169,7 @@ def _resolve_definitions(
                         record_ref=definition.record_ref_for(config),
                         runtime_descriptor=config.runtime.requirement,
                         executor=EvalchemyExecutor(config),
-                        secret_env=dict(definition.secret_env),
+                        secret_env=dict(secret_env),
                     ),
                 )
             )
